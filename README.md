@@ -2,7 +2,7 @@
 
 **Track:** DSAI — IIT Mandi HimShikhar Program (AAI)
 **Author:** Vaishali Gupta
-
+🔗 **Live Demo:** https://food-security-risk-insights-y6spbmchssxvya62jgkuzn.streamlit.app
 ## Problem Statement
 
 Food insecurity affects countries differently depending on how affordable,
@@ -67,12 +67,12 @@ feature importance answers **"what's driving that risk in general."**
 
 ## How to Run
 
-1. Clone this repository
-2. Install dependencies: `pip install -r requirements.txt`
-3. Open `notebooks/Food_Security_Risk_Insights_System.ipynb` in Jupyter or
-   Google Colab
-4. Run all cells top to bottom
-5. (Optional) Run the dashboard: `streamlit run app/app.py`
+
+**Option 1 — Try it live (recommended):**
+🔗 https://food-security-risk-insights-y6spbmchssxvya62jgkuzn.streamlit.app
+
+**Option 2 — Run locally:**
+1. Clone this repository:
 
 ## Results and Insights
 
