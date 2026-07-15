@@ -151,7 +151,6 @@ st.plotly_chart(fig_radar, use_container_width=True, key="radar_chart")
 
 st.divider()
 
-# --- Country Comparison ---
 
 # --- Country Comparison ---
 st.subheader("⚖️ Compare Two Countries")
@@ -272,6 +271,64 @@ top_driver = importance_df.iloc[-1]['Pillar']
 st.info(f"📊 **{top_driver}** is the strongest driver of overall food security risk based on this analysis.")
 
 st.divider()
+
+# --- Outlier Detection (Isolation Forest) ---
+st.subheader("🔎 Outlier Countries")
+st.write(
+    "Using Isolation Forest, we identify countries whose pillar profile is statistically "
+    "unusual compared to the rest — either an unexpected weakness or an unusual strength."
+)
+
+from sklearn.ensemble import IsolationForest
+from sklearn.preprocessing import StandardScaler
+
+X_outlier = df[pillars]
+scaler_out = StandardScaler()
+X_outlier_scaled = scaler_out.fit_transform(X_outlier)
+
+iso_forest = IsolationForest(contamination=0.05, random_state=42)
+df['is_outlier'] = iso_forest.fit_predict(X_outlier_scaled)
+
+outliers = df[df['is_outlier'] == -1]
+st.write(f"**{len(outliers)} outlier countries identified:**")
+st.dataframe(
+    outliers[['Country', 'Overall score', 'risk_category', 'cluster_label']],
+    use_container_width=True
+)
+
+fig_outlier = px.scatter(
+    df, x='Affordability', y='Sustainability and Adaptation',
+    color=df['is_outlier'].map({1: 'Normal', -1: 'Outlier'}),
+    hover_name='Country',
+    title='Outlier Detection: Affordability vs Sustainability',
+    color_discrete_map={'Normal': '#97BC62', 'Outlier': '#C1440E'}
+)
+st.plotly_chart(fig_outlier, use_container_width=True, key="outlier_chart")
+
+st.divider()
+
+# --- Interactive Risk Predictor ---
+st.subheader("🎛️ Interactive Risk Predictor")
+st.write("Adjust the sliders to simulate a hypothetical country's profile and predict its risk.")
+
+from sklearn.ensemble import RandomForestClassifier
+
+pred_col1, pred_col2 = st.columns(2)
+sim_afford = pred_col1.slider("Affordability", 0.0, 100.0, 50.0)
+sim_avail = pred_col1.slider("Availability", 0.0, 100.0, 50.0)
+sim_quality = pred_col2.slider("Quality and Safety", 0.0, 100.0, 50.0)
+sim_sustain = pred_col2.slider("Sustainability and Adaptation", 0.0, 100.0, 50.0)
+
+clf = RandomForestClassifier(n_estimators=100, random_state=42)
+clf.fit(df[pillars], df['risk_category'])
+
+sim_input = pd.DataFrame([[sim_afford, sim_avail, sim_quality, sim_sustain]], columns=pillars)
+predicted_category = clf.predict(sim_input)[0]
+predicted_score = rf.predict(sim_input)[0]
+
+pred_result_col1, pred_result_col2 = st.columns(2)
+pred_result_col1.metric("Predicted Risk Score", f"{predicted_score:.1f}")
+pred_result_col2.metric("Predicted Risk Category", predicted_category)
 
 # --- About / Methodology ---
 with st.expander("ℹ️ About This Dashboard"):
